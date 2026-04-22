@@ -79,16 +79,16 @@ curl -X POST http://localhost:8080/api/v1/sensors/TEMP-001/readings \
 ## Report – Question Answers
 
 ### Part 1.1 – JAX-RS Resource Lifecycle
-By default, JAX-RS creates a **new instance** of a resource class for every incoming HTTP request. This means instance variables are reset on every request. To share data across requests, this project uses a **static DataStore class** with static HashMaps, so all resource instances share the same data. This prevents data loss between requests.
+Each time an HTTP request arrives, JAX-RS sets up a fresh object from the resource class. Because of this setup, any values stored in fields disappear when the request ends. Shared access to information between calls relies on a fixed DataStore structure instead. Inside that store, static maps hold what needs to persist. Since all objects refer to the same storage, nothing gets lost when one request finishes and another begins.
 
 ### Part 1.2 – HATEOAS
-HATEOAS means the API response includes links to related resources. This helps client developers navigate the API without reading documentation. If URLs change, clients follow the links instead of hardcoded paths, reducing coupling between client and server.
+Most responses under HATEOAS contain references pointing toward connected data elements. Because of this, engineers working on client applications can move through endpoints more easily. When address locations shift over time, software uses these embedded pointers rather than fixed routes. As a result, reliance between front-end tools and backend systems grows weaker.
 
 ### Part 2.1 – ID Only vs Full Object
-Returning only IDs forces the client to make extra requests for each item (N+1 problem), increasing server load. Returning full objects gives the client everything in one request, which is more efficient for most use cases. This API returns full objects by default.
+One reason this API defaults to full objects? Efficiency in typical scenarios. Fetching just IDs means clients must ask again and again, each item triggers another call, piling up load. Full data upfront avoids that cascade entirely. Less back-and-forth equals fewer demands on the server. Most situations benefit simply by getting it all at once.
 
 ### Part 2.2 – DELETE Idempotency
-Yes, DELETE is idempotent. The first call removes the room and returns `200 OK`. If the same DELETE is sent again, the room is already gone so the server returns `404 Not Found`. The server state is the same after both calls — the room does not exist. No extra side effects occur.
+True, DELETE holds steady under repetition. Following the initial request, the space vanishes with a `200 OK` response. Repeating that same DELETE finds nothing left, a `413 Not Found` appears instead. Identical outcome follows each attempt, absence of the room persists without exception.
 
 ### Part 3.1 – @Consumes Mismatch
 If a client sends data with `Content-Type: text/plain` to a method annotated with `@Consumes(APPLICATION_JSON)`, JAX-RS automatically returns **HTTP 415 Unsupported Media Type**. The resource method is never called. This protects the API from malformed input.
