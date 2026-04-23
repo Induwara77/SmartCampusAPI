@@ -104,3 +104,6 @@ HTTP 404 means the URL endpoint was not found. HTTP 422 means the endpoint was f
 
 ### Part 5.2 – Stack Trace Security Risks
 Exposing stack traces reveals internal package names, class names, library versions, and file paths. Attackers can use this to find known vulnerabilities in specific library versions. This project uses a `GlobalExceptionMapper` that catches all unexpected errors and returns a safe generic `500 Internal Server Error` message instead.
+
+### Part 5.3 – Why Use Filters for Logging 
+Every resource method cluttered with log lines leads to duplicated effort, tougher updates. Changing how logs appear means editing each function individually. Central control comes through JAX-RS filters instead. One filter handles all incoming and outgoing messages at once. Here, the LoggingFilter captures requests and responses silently, bypassing manual edits in business logic. Code stays neat when repetition fades. Organisation improves because details live in one spot.
